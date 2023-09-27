@@ -1,0 +1,37 @@
+version: '3'
+services:
+  frontend:
+    build: ./collaborative-cookbook
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./collaborative-cookbook:/app
+      - /app/node_modules
+    networks:
+      - internal
+  backend:
+    build: ./collaborative_cookbook_backend
+    ports:
+      - "8000:8000"
+    networks:
+      - internal
+    depends_on:
+      - recipes
+  recipes:
+    image: 'postgres:15'
+    hostname: recipes
+    environment:
+      POSTGRES_DB: collaborative_cookbook
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5432:5432'
+    networks:
+      - internal
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+networks:
+  internal:
+
+volumes:
+  postgres_data:
