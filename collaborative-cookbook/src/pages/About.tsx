@@ -1,7 +1,7 @@
 const About = () => {
     return (
         <div>
-            ABOUT ME BIIIIIIITCH
+            ABOUT ME 
             </div>
     )
 }
