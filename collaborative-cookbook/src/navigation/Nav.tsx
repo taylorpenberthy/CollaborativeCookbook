@@ -20,6 +20,7 @@ import AllRecipes from '../pages/AllRecipes';
 import Creators from '../pages/Creators';
 import CoCookHome from '../pages/CoCookHome';
 import NewRecipe from '../pages/NewRecipe';
+import IndividualRecipe from '../pages/IndividualRecipe';
 
 const RECIPES = 'recipes';
 const INGREDIENTS = 'ingredients';
@@ -157,6 +158,7 @@ function ResponsiveAppBar() {
       <Route path="/creators" element={<Creators/>} />
       <Route path="/new" element={<NewRecipe/>}/>
       <Route path="/" element={<CoCookHome />}/>
+      <Route path="/recipes/:id" element={<IndividualRecipe />} />
       </Routes>
     </Router>
   );

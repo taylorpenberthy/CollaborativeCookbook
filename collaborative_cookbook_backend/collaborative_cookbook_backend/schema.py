@@ -1,4 +1,8 @@
+import boto3
+import io
+import os
 import graphene
+
 from graphene_django import DjangoObjectType
 from graphene_file_upload.scalars import Upload
 
@@ -6,6 +10,10 @@ from django.contrib.auth import get_user_model
 
 from recipes.models import Recipe, Ingredient
 from recipes.serializers import RecipeSerializer, IngredientSerializer
+from django.core.files.base import ContentFile
+import base64
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 
 class CustomUserType(DjangoObjectType):
     class Meta:
@@ -35,7 +43,6 @@ class CreateIngredientMutation(graphene.Mutation):
     def mutate(self, info, name,):
         data = {'name': name, }
         serializer = IngredientSerializer(data=data)
-        print('serializer', serializer)
         if serializer.is_valid():
             ingredient = serializer.save()
             return CreateIngredientMutation(ingredient=ingredient, success=True)
@@ -48,33 +55,39 @@ class CreateRecipeMutation(graphene.Mutation):
         name = graphene.String(required=True)
         description = graphene.String(required=True)
         instructions = graphene.String(required=True)
-        image = graphene.String()  # Assuming base64 encoded image
-        ingredient_ids = graphene.List(graphene.Int, required=True)
+        image = graphene.String()
+        ingredients = graphene.List(graphene.String, required=True)  # New field for ingredient names
+        amounts = graphene.List(graphene.String, required=False) 
         created_by = graphene.Int()
 
     success = graphene.Boolean()
     recipe = graphene.Field(RecipeType)
 
-    def mutate(self, info, description, name, instructions, image, ingredient_ids, created_by, **kwargs):
-        print('DEBUGGGING CREATED BY: ', created_by)
-        ingredients = Ingredient.objects.filter(id__in=ingredient_ids)
+    def mutate(self, info, description, name, instructions, image, ingredients, amounts, created_by, **kwargs):
+        # Create or get ingredients and their amounts
+        ingredient_objects = []
+        for ingredient_name, amount in zip(ingredients, amounts):
+            ingredient, created = Ingredient.objects.get_or_create(name=ingredient_name)
+            ingredient_objects.append({'ingredient': ingredient.id, 'amount': amount})
+
         data = {
             'name': name,
             'description': description,
             'instructions': instructions,
             'image': image,
             'created_by': created_by,
-            'ingredients': ingredient_ids
+            'ingredients': ingredient_objects  # Pass the list of dictionaries
         }
 
         serializer = RecipeSerializer(data=data)
+
         if serializer.is_valid():
             recipe = serializer.save()
-            recipe.ingredients.set(ingredients)
-            recipe.save()
             return CreateRecipeMutation(recipe=recipe, success=True)
         else:
+            print("Serializer errors:", serializer.errors)
             return CreateRecipeMutation(recipe=None, success=False)
+
 
 class UpdateRecipeMutation(graphene.Mutation):
     class Arguments:
@@ -105,12 +118,38 @@ class UpdateRecipeMutation(graphene.Mutation):
 
         recipe.save()
         return UpdateRecipeMutation(recipe=recipe, success=True)
-# Similar mutations for updating Recipe and Ingredient
 
+class GeneratePresignedUrl(graphene.Mutation):
+    class Arguments:
+        file_name = graphene.String(required=True)
+        file_type = graphene.String(required=True)
+        
+    presigned_url = graphene.String()
+    
+    def mutate(self, info, file_name, file_type):
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID', 'default_value'),
+            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY', 'default_value'),
+            region_name='us-east-2',
+        )
+        
+        presigned_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={'Bucket': 'collabcook',
+                    'Key': file_name,
+                    'ContentType': file_type},
+            ExpiresIn=3600
+        )
+        
+        return GeneratePresignedUrl(presigned_url=presigned_url)
+    
 class Mutation(graphene.ObjectType):
     create_ingredient = CreateIngredientMutation.Field()
     create_recipe = CreateRecipeMutation.Field()
     update_recipe = UpdateRecipeMutation.Field()
+    generate_presigned_url = GeneratePresignedUrl.Field()
+
 
 
 class Query(
@@ -118,12 +157,19 @@ class Query(
 ):
     ingredients = graphene.List(IngredientType)
     recipes = graphene.List(RecipeType)
+    recipe = graphene.Field(RecipeType, id=graphene.Int(required=True))
 
     def resolve_ingredients(self, info):
         return Ingredient.objects.all()
 
     def resolve_recipes(self, info):
         return Recipe.objects.all()
+    
+    def resolve_recipe(self, info, id):
+        try:
+            return Recipe.objects.get(id=id)
+        except Recipe.DoesNotExist:
+            return None
 
 
 

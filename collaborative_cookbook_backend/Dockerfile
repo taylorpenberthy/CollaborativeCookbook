@@ -1,4 +1,5 @@
 # Use an official Python runtime as base image
+# optimize the image size by using a smaller base image
 FROM python:3.8
 
 # Set environment variables

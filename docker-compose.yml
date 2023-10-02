@@ -11,10 +11,16 @@ services:
       - internal
   backend:
     build: ./collaborative_cookbook_backend
+    volumes:
+      - ./collaborative_cookbook_backend:/app
     ports:
       - "8000:8000"
     networks:
       - internal
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
     depends_on:
       - recipes
   recipes:

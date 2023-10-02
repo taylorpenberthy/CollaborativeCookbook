@@ -1,11 +1,36 @@
+import boto3
+import os
 from django.shortcuts import render
 from rest_framework import generics, viewsets, status
+from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 
 from .models import Recipe, Ingredient
 from .serializers import RecipeSerializer, IngredientSerializer
 
+class GeneratePresignedUrl(APIView):
+    def get(self, request):
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
+            region_name='us-east-2',
+        )
+        
+        file_name = request.GET.get('file_name')
+        file_type = request.GET.get('file_type')
+        
+        presigned_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={'Bucket': 'collabcook',
+                    'Key': file_name,
+                    'ContentType': file_type},
+            ExpiresIn=3600
+        )
+        
+        return Response({"presigned_url": presigned_url})
+    
 class RecipeView(generics.ListCreateAPIView):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer

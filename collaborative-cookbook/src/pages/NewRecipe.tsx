@@ -1,15 +1,98 @@
 import React, { useState, FormEvent } from "react";
 import { Button, TextField, Typography, Paper, Grid, InputAdornment } from "@mui/material";
 import { AddBox } from "@mui/icons-material";
+import { useNavigate } from 'react-router-dom';
+import { useMutation } from "@apollo/client";
+import { CREATE_RECIPE, GENERATE_PRESIGNED_URL } from "../queries";
+import { createUseStyles } from "react-jss";
 
+const useStyles = createUseStyles({
+  formStyle: {
+    margin: 20,
+    padding: '20px',
+    backgroundColor: '#f9f5e8', 
+    border: '2px solid #d1c7ac', 
+    borderRadius: '10px',
+    boxShadow: '5px 5px 10px #888888',
+  },
+  imageContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  title: {
+    fontFamily: "'Courier New', Courier, monospace", 
+    borderBottom: '2px solid #d1c7ac',
+    paddingBottom: '10px',
+  },
+  textField: {
+    fontFamily: "'Courier New', Courier, monospace",
+  },
+  ingredientSection: {
+    marginTop: '20px',
+    borderBottom: '1px dashed #d1c7ac',
+    paddingBottom: '10px',
+  },
+  button: {
+    backgroundColor: '#d1c7ac', 
+    '&:hover': {
+      backgroundColor: '#b5a490',
+    },
+  },
+});
 
 const NewRecipe: React.FC = () => {
+  const classes = useStyles();
+    const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [instructions, setInstructions] = useState('');
     const [ingredients, setIngredients] = useState([{ name: '', amount: '' }]);
     const [image, setImage] = useState<File | null>(null);
+    const [generatePresignedUrl] = useMutation(GENERATE_PRESIGNED_URL);
   
+    const [createRecipe, { data, loading, error }] = useMutation(CREATE_RECIPE, {
+        variables: {
+            name: title,
+            description: description,
+            instructions: instructions,
+            ingredients: ingredients.length ? ingredients.map(ing => ing.name) : [],
+            amounts: ingredients.length ? ingredients.map(ing => ing.amount) : [],
+            image: image,
+            createdBy: 1,
+        }
+    });
+
+ 
+    const uploadToS3 = async (file: File) => {
+      const fileName = `recipes/${file.name}`;
+      const fileType = file.type;
+      
+      // Fetch the pre-signed URL using GraphQL mutation
+      const { data } = await generatePresignedUrl({
+          variables: {
+              fileName: fileName,
+              fileType: fileType
+          }
+      });
+      
+      const presigned_url = data.generatePresignedUrl.presignedUrl;
+      
+      // Upload the file to S3
+      await fetch(presigned_url, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': fileType,
+          },
+          body: file,
+      });
+      
+      // Construct the full S3 URL
+      const fullS3Url = `https://collabcook.s3.amazonaws.com/${fileName}`;
+      
+      return fullS3Url;  // This will be saved in your database
+  };
+  
+   
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -22,78 +105,89 @@ const NewRecipe: React.FC = () => {
     };
   
     // TODO: Implement the submit logic here
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         console.log('Form submitted');
-        console.log('title', title);
-        console.log('description', description);
-        console.log('instructions', instructions);
-        console.log('ingredients', ingredients);
-        console.log('image', image);
-    };
+      
+        // Separate ingredients and amounts into two arrays
+        const ingredientNames = ingredients.map((ing) => ing.name);
+        const ingredientAmounts = ingredients.map((ing) => ing.amount);
+
+        let s3FileName = null;
+        if (image) {
+            s3FileName = await uploadToS3(image);
+        }
+        try {
+          await createRecipe({
+            variables: {
+              name: title,
+              description: description,
+              instructions: instructions,
+              ingredients: ingredientNames,
+              amounts: ingredientAmounts,
+              image: s3FileName,
+              createdBy: 1,
+            },
+          });
+          navigate(`/recipes/${data.createRecipe.recipe.id}`);
+        } catch (err) {
+          console.error('Error creating recipe:', err);
+        }
+      };
   
-    console.log('ingredients outside handle sub', ingredients);
-    console.log('instructions outside', instructions);
-    return (
-      <Paper style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-        <Typography variant="h4" gutterBottom>
-          Create New Recipe
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            fullWidth
-            label="Recipe Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            fullWidth
-            label="Instructions"
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            margin="normal"
-            multiline
-            rows={4}
-          />
-          <input
-            accept="image/*"
-            style={{ display: 'none' }}
-            id="image-upload"
-            type="file"
-            onChange={handleImageUpload}
-          />
-          <label htmlFor="image-upload">
-            <Button variant="contained" color="primary" component="span">
-              Upload Image
-            </Button>
-          </label>
-          <Typography variant="h6" gutterBottom style={{ marginTop: '20px' }}>
-            Ingredients
-          </Typography>
-          {ingredients.map((ingredient, index) => (
-            <Grid container spacing={2} key={index}>
-              <Grid item xs={6}>
+      return (
+        <form onSubmit={handleSubmit} className={classes.formStyle}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="h4" className={classes.title}>New Recipe</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                fullWidth
+                className={classes.textField}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Instructions"
+                value={instructions}
+                onChange={(event) => setInstructions(event.target.value)}
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </Grid>
+            <Grid item xs={12} className={classes.ingredientSection}>
+              <Typography variant="h6">Ingredients</Typography>
+              {ingredients.map((ingredient, index) => (
+                   <Grid container spacing={2} key={index}>
+                           <Grid item xs={6}>
                 <TextField
-                  fullWidth
-                  label="Ingredient"
+                  key={index}
+                  label={`Ingredient ${index + 1}`}
                   value={ingredient.name}
-                  onChange={(e) => {
+                  onChange={(event) => {
                     const newIngredients = [...ingredients];
-                    newIngredients[index].name = e.target.value;
+                    newIngredients[index].name = event.target.value;
                     setIngredients(newIngredients);
-                  }}
+                  }
+                  }
+                  fullWidth
                 />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
+                 </Grid>
+           <Grid item xs={6}>
+           <TextField
                   fullWidth
                   label="Amount"
                   value={ingredient.amount}
@@ -108,27 +202,32 @@ const NewRecipe: React.FC = () => {
                 />
               </Grid>
             </Grid>
-          ))}
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<AddBox />}
-            onClick={addIngredientField}
-            style={{ marginTop: '10px' }}
-          >
-            Add Ingredient
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            style={{ marginTop: '20px', float: 'right' }}
-          >
-            Submit
-          </Button>
+              ))}
+              <Button onClick={addIngredientField} className={classes.button}>Add Ingredient</Button>
+            </Grid>
+            <Grid item xs={12} className={classes.imageContainer}>
+              <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="image-upload"
+              type="file"
+              onChange={handleImageUpload}
+              />
+              <label htmlFor="image-upload">
+                <Button variant="contained" color="secondary" component="span">
+                  Upload Image
+                </Button>
+              </label>
+            </Grid>
+            <Grid item xs={12}>
+              <Button type="submit" variant="contained" color="primary">
+                Submit
+              </Button>
+            </Grid>
+          </Grid>
         </form>
-      </Paper>
-    );
-  };
+      );
+    };
+  
 
 export default NewRecipe;
