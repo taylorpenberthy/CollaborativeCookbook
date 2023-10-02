@@ -23,7 +23,6 @@ import NewRecipe from '../pages/NewRecipe';
 import IndividualRecipe from '../pages/IndividualRecipe';
 
 const RECIPES = 'recipes';
-const INGREDIENTS = 'ingredients';
 const CREATORS = 'creators';
 const NEW_RECIPE = 'new recipe'
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -80,7 +79,7 @@ function ResponsiveAppBar() {
               fontFamily: 'monospace',
               fontWeight: 700,
               letterSpacing: '.3rem',
-              color: '#5E9761',
+              color: '#A5A58D',
               textDecoration: 'none',
             }}
           >
@@ -93,28 +92,28 @@ function ResponsiveAppBar() {
               <Button
                 key={RECIPES}
                 component={Link} to="/about"
-                sx={{ my: 2, color: '#5E9761', display: 'block' }}
+                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
               >
                 ABOUT
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/recipes"
-                sx={{ my: 2, color: '#5E9761', display: 'block' }}
+                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
               >
                 All Recipes
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/creators"
-                sx={{ my: 2, color: '#5E9761', display: 'block' }}
+                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
               >
                 {CREATORS}
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/new"
-                sx={{ my: 2, color: '#5E9761', display: 'block' }}
+                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
               >
                 {NEW_RECIPE}
               </Button>

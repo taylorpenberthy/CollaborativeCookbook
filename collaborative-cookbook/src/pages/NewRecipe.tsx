@@ -1,6 +1,5 @@
 import React, { useState, FormEvent } from "react";
-import { Button, TextField, Typography, Paper, Grid, InputAdornment } from "@mui/material";
-import { AddBox } from "@mui/icons-material";
+import { Button, TextField, Typography, Grid, InputAdornment } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from "@apollo/client";
 import { CREATE_RECIPE, GENERATE_PRESIGNED_URL } from "../queries";
@@ -62,6 +61,9 @@ const NewRecipe: React.FC = () => {
         }
     });
 
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error.message}</p>;
+    
  
     const uploadToS3 = async (file: File) => {
       const fileName = `recipes/${file.name}`;
