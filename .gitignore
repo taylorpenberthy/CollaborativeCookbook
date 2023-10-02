@@ -24,6 +24,6 @@ yarn-error.log*
 /vscode
 /.vscode
 .env
-venv/
+venv /
 __pycache__/
-
+collaborative_cookbook_backend/venv/
