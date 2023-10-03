@@ -27,6 +27,12 @@ export const GET_RECIPE = gql`
         username
       }
       image
+      recipeIngredients {
+        amount
+        ingredient {
+          name
+        }
+      }
       description
       instructions
       ingredients {

@@ -8,7 +8,7 @@ from graphene_file_upload.scalars import Upload
 
 from django.contrib.auth import get_user_model
 
-from recipes.models import Recipe, Ingredient
+from recipes.models import Recipe, Ingredient, RecipeIngredient
 from recipes.serializers import RecipeSerializer, IngredientSerializer
 from django.core.files.base import ContentFile
 import base64
@@ -20,19 +20,28 @@ class CustomUserType(DjangoObjectType):
         model = get_user_model()
         fields = ("id", "username", "email", "first_name", "last_name")
 
+class RecipeIngredientType(DjangoObjectType):
+    class Meta:
+        model = RecipeIngredient
+        fields = ("ingredient", "amount")
+
 class RecipeType(DjangoObjectType):
+    recipe_ingredients = graphene.List(RecipeIngredientType)
+
     class Meta:
         model = Recipe
         fields = ("id", "name", "ingredients", "created_by", "description", "instructions", "image")
 
     created_by = graphene.Field(lambda: CustomUserType)
 
+    def resolve_recipe_ingredients(self, info):
+        return self.recipeingredient_set.all()
+
 
 class IngredientType(DjangoObjectType):
     class Meta:
         model = Ingredient
 
-    
 class CreateIngredientMutation(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
