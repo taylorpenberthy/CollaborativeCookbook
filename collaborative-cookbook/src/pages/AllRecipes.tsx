@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/client';
 import { GET_RECIPES } from '../queries';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardMedia, Grid, Button } from '@mui/material';
-import type { Recipe } from './types';
+import type { Recipe } from '../utils/types';
 
 const useStyles = createUseStyles({
     cardsContainer: {

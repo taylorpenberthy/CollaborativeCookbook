@@ -14,6 +14,39 @@
   }
 }
 
+
+@font-face {
+  font-family: 'ReenieBeanie';
+  src: url('./ReenieBeanie-Regular.ttf');
+}
+
+
+@font-face {
+  font-family: 'OldStandardTTItalic';
+  src: url('./OldStandardTT-Italic.ttf');
+}
+@font-face {
+  font-family: 'OldStandardTT';
+  src: url('./OldStandardTT-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'OldStandardTTBold';
+  src: url('./OldStandardTT-Bold.ttf');
+}
+
+@font-face {
+  font-family: 'PatrickHand';
+  src: url('./PatrickHandSC-Regular.ttf');
+}
+
+
+@font-face {
+  font-family: 'Britney-Variable';
+  src: url('./Britney-Variable.ttf');
+}
+
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

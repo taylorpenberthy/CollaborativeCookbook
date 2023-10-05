@@ -1,110 +1,23 @@
 import React from "react";
 import { useQuery } from "@apollo/client";
 import { GET_RECIPE } from "../queries";
-import { Typography, Card, CardMedia, CardContent } from "@mui/material";
+import {
+  Divider,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+} from "@mui/material";
 import { useParams } from "react-router-dom";
-import { createUseStyles } from "react-jss";
-
-interface Ingredient {
-  name: string;
-}
-
-interface RecipeIngredient {
-  amount: string;
-  ingredient: {
-    name: string;
-  };
-}
-interface Recipe {
-  name: string;
-  image: string;
-  description: string;
-  ingredients: Ingredient[];
-  amounts: number[];
-  instructions: string;
-  createdBy: {
-    username: string;
-  };
-  recipeIngredients: RecipeIngredient[];
-}
+import { useCommonStyles } from "../utils/utils";
+import type { Recipe, RecipeIngredient } from "../utils/types";
 
 interface RecipeData {
   recipe: Recipe;
 }
 
-const useStyles = createUseStyles({
-  body: {
-    background: "none!important",
-  },
-  instructionsList: {
-    listStyleType: "none",
-    paddingLeft: "0px",
-  },
-  ingredientsList: {
-    fontFamily: "Montserrat",
-    fontSize: "14px",
-    lineHeight: "1.5",
-    listStyleType: "none",
-    columnCount: 2, // Number of columns
-    columnGap: "16px",
-  },
-  ingredientsCard: {
-    maxWidth: "200px",
-    overflow: "auto",
-  },
-  imageCard: {
-    float: "right",
-    marginRight: "20px",
-  },
-  bookContainer: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    background: "#f4f4f4",
-    padding: "40px",
-    position: "relative",
-  },
-  page: {
-    flex: 1,
-    border: "1px solid #ccc",
-    padding: "20px",
-    boxSizing: "border-box",
-    background: "#fff",
-    height: "600px",
-    width: "400px",
-    position: "relative",
-    overflow: "hidden",
-    borderRadius: "0 25px 25px 0", // Right page curl
-    boxShadow:
-      "0px 0px 20px rgba(0,0,0,0.2), inset 0px 0px 50px rgba(0,0,0,0.1)",
-  },
-  spine: {
-    width: "15px",
-    height: "600px",
-    background: "linear-gradient(to bottom, #fff, #ccc, #fff)",
-    position: "absolute",
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: -1,
-  },
-  spiral: {
-    width: "10px",
-    height: "10px",
-    borderRadius: "50%",
-    background: "#333",
-    position: "absolute",
-    left: "50%",
-  },
-  leftPage: {
-    borderRadius: "25px 0 0 25px", // Left page curl
-    boxShadow:
-      "0px 0px 20px rgba(0,0,0,0.2), inset 0px 0px 50px rgba(0,0,0,0.1)",
-  },
-});
-
 const IndividualRecipe = () => {
-  const classes = useStyles();
+  const classes = useCommonStyles();
   const { id } = useParams();
   const integerId = parseInt(id || "", 10);
   const { loading, error, data } = useQuery<RecipeData>(GET_RECIPE, {
@@ -112,7 +25,7 @@ const IndividualRecipe = () => {
   });
   if (loading) return <p>Loading...</p>;
 
-  if (error) return <p>Error :</p>;
+  if (error) return <p>Error: </p>;
 
   const { recipe } = data!;
 
@@ -120,19 +33,44 @@ const IndividualRecipe = () => {
   return (
     <div className={classes.bookContainer}>
       <div className={`${classes.page} ${classes.leftPage}`}>
-        <Typography variant="h4">{recipe.name}</Typography>
+        <div className={classes.header}>
+          <Typography variant="h3" className={classes.collabCookHeader}>
+            The Collaborative Cookbook
+          </Typography>
+        </div>
+        <Divider />
+        <Typography variant="h4" className={classes.recipeName}>
+          {recipe.name.toUpperCase()}
+        </Typography>
+
+        <div className={classes.description}>
+          <Typography variant="body1" className={classes.bodyText}>
+            {recipe.description}
+          </Typography>
+        </div>
+        <div className={classes.basicInfo}>
+          <div className={classes.timeAndServings}>
+            <Typography variant="body1" className={classes.bodyText}>
+              Serves: 12
+            </Typography>
+            <Divider orientation="vertical" className={classes.vertDivider} />
+            <Typography variant="body1" className={classes.bodyText}>
+              Prep: 10 minutes
+            </Typography>
+            <Divider orientation="vertical" className={classes.vertDivider} />
+            <Typography variant="body1" className={classes.bodyText}>
+              Cook: 15 minutes
+            </Typography>
+            <Divider orientation="vertical" className={classes.vertDivider} />
+            <Typography variant="body1" className={classes.bodyText}>
+              Total: 25 minutes
+            </Typography>
+          </div>
+        </div>
+        <Divider />
         <div className={classes.ingredientsCard}>
-          <Typography
-            variant="h6"
-            style={{
-              textAlign: "left",
-              fontFamily: "Montserrat",
-              fontWeight: "bold",
-              marginBottom: "16px",
-              marginLeft: "10px",
-            }}
-          >
-            Ingredients
+          <Typography variant="h6" className={classes.subHeader}>
+            INGREDIENTS
           </Typography>
           <ul className={classes.ingredientsList}>
             {recipe.recipeIngredients.map(
@@ -150,15 +88,18 @@ const IndividualRecipe = () => {
             )}
           </ul>
         </div>
-        <Typography variant="h6">Instructions</Typography>
-        <ol className={classes.instructionsList}>
+        <Divider />
+        <Typography variant="h6" className={classes.subHeader}>
+          INSTRUCTIONS
+        </Typography>
+        <ol className={`${classes.instructionsList} ${classes.bodyText}`}>
           {instructionsArray.map((instruction, index) => (
             <li key={index}>
               Step {index + 1}: {instruction}
             </li>
           ))}
         </ol>
-        <Typography variant="body2">
+        <Typography variant="body2" className={classes.createdBy}>
           Created by: {recipe.createdBy.username}
         </Typography>
       </div>
