@@ -9,6 +9,8 @@ export const GET_RECIPES = gql`
         username
       }
       image
+      difficulty
+      recipeType
       description
       instructions
       ingredients {
@@ -33,6 +35,7 @@ export const GET_RECIPE = gql`
           name
         }
       }
+      recipeType
       description
       instructions
       ingredients {

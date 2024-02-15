@@ -30,7 +30,7 @@ class RecipeType(DjangoObjectType):
 
     class Meta:
         model = Recipe
-        fields = ("id", "name", "ingredients", "created_by", "description", "instructions", "image")
+        fields = ("id", "name", "ingredients", "created_by", "description", "recipe_type", "instructions", "image", "difficulty")
 
     created_by = graphene.Field(lambda: CustomUserType)
 

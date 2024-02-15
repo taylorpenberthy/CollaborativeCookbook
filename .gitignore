@@ -27,3 +27,4 @@ yarn-error.log*
 venv /
 __pycache__/
 collaborative_cookbook_backend/venv/
+collaborative-cookbook/src/media

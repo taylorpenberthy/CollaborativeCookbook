@@ -23,7 +23,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('name', 'description', 'instructions', 'image', 'created_by', 'ingredients')
+        fields = ('name', 'description', 'instructions', 'image', 'created_by', 'ingredients', 'recipe_type', 'difficulty')
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')

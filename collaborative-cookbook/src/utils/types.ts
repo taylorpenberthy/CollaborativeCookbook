@@ -23,5 +23,7 @@ export interface Recipe {
     createdBy: {
       username: string;
     };
+    recipeType: string;
+    difficulty?: number;
     recipeIngredients: RecipeIngredient[];
   }

@@ -22,6 +22,7 @@ import CoCookHome from '../pages/CoCookHome';
 import NewRecipe from '../pages/NewRecipe';
 import IndividualRecipe from '../pages/IndividualRecipe';
 import RecipeBook from '../pages/RecipeBook';
+import thecookbooklogo from '../media/thecookbooklogo.png';
 
 const RECIPES = 'recipes';
 const CREATORS = 'creators';
@@ -49,6 +50,9 @@ const useStyles = createUseStyles({
     rightMenu: {
       justifyContent: 'flex-end',
     },
+    navBarLogo: {
+      maxHeight: '10vh'
+    }
   });
 function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -69,52 +73,35 @@ function ResponsiveAppBar() {
     <AppBar position="static" style={{ background: 'none', boxShadow: 'none'}}>
       <Container maxWidth="xl" >
         <Toolbar disableGutters className={classes.navBarContainer}>
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="/"
-            sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex', flexDirection: 'column' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: '#A5A58D',
-              textDecoration: 'none',
-            }}
-          >
-            CoCook
-          </Typography>
-
+        <img src={thecookbooklogo} alt="CoCook" className={classes.navBarLogo}/>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Box  sx={{ display: { xs: 'flex', md: 'flex' }, justifyContent: 'flex-start' }}>
             
               <Button
                 key={RECIPES}
                 component={Link} to="/about"
-                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
+                sx={{ my: 2, color: '#fc60b2', fontWeight: 600, display: 'block' }}
               >
                 ABOUT
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/recipes"
-                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
+                sx={{ my: 2, color: '#fc60b2', fontWeight: 600, display: 'block' }}
               >
                 All Recipes
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/creators"
-                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
+                sx={{ my: 2, color: '#fc60b2', fontWeight: 600, display: 'block' }}
               >
                 {CREATORS}
               </Button>
               <Button
                 key={RECIPES}
                 component={Link} to="/new"
-                sx={{ my: 2, color: '#A5A58D', fontWeight: 600, display: 'block' }}
+                sx={{ my: 2, color: '#fc60b2', fontWeight: 600, display: 'block' }}
               >
                 {NEW_RECIPE}
               </Button>

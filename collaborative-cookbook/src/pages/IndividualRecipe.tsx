@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { useCommonStyles } from "../utils/utils";
+import thecookbooklogo from "../media/thecookbooklogo.png";
+
 import type { Recipe, RecipeIngredient } from "../utils/types";
 
 interface RecipeData {
@@ -34,9 +36,7 @@ const IndividualRecipe = () => {
     <div className={classes.bookContainer}>
       <div className={`${classes.page} ${classes.leftPage}`}>
         <div className={classes.header}>
-          <Typography variant="h3" className={classes.collabCookHeader}>
-            The Collaborative Cookbook
-          </Typography>
+            <img className={classes.logoContainer} src={thecookbooklogo} alt="logo"/>
         </div>
         <Divider />
         <Typography variant="h4" className={classes.recipeName}>

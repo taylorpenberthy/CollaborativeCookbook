@@ -1,67 +1,58 @@
-import React from 'react';
-import cocook from './cocook.png';
-import mainpage from './pink.png';
-import { createUseStyles } from 'react-jss';
-import { Button } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React from "react";
+import thecookbooklogo from "../media/thecookbooklogo.png";
+import mainpage from "./pink.png";
+import { createUseStyles } from "react-jss";
+import { Button } from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 // overwrite materialUI's built-in colors for the CTA button
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#5E9761",
-    }
+      main: "#A2D2FF",
+    },
   },
 });
 
 const useStyles = createUseStyles({
   heroContainer: {
     display: "flex",
-    alignItems: 'center',
-    flexDirection: "row",
-    justifyContent: 'space-around',
-    margin: "80px 80px 80px 160px"
+    alignItems: "center",
+
+    flexDirection: "column",
+    justifyContent: "center",
   },
   gatheringImg: {
     maxWidth: "250px",
     maxHeight: "250px",
   },
-  imgContainer: {
-
-  },
+  imgContainer: {},
   heroButton: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   },
-  coCook: {
-    maxWidth: '800px',
-    maxHeight: '500px'
-  }
-})
+  cookbookLogo: {
+    maxHeight: "100vh",
+    marginBottom: '20px',
+  },
+});
 
 function CoCookHome() {
   const classes = useStyles();
 
   return (
     <React.Fragment>
-    <div className={classes.heroContainer} >
-      <div className={classes.imgContainer}>
-      <img className={classes.gatheringImg} src={mainpage} alt="gathering"/>
-      </div>
-      <div >
-      <img className={classes.coCook} src={cocook} alt="CoCook"/>
-    </div>
-
-  </div>
-  <div className={classes.heroButton}>
-      <ThemeProvider theme={theme}>
-      <Button href={'/new'}
+      <div className={classes.heroContainer}>
+        <img className={classes.cookbookLogo} src={thecookbooklogo} alt="CoCook" />
+        
+      <ThemeProvider theme={theme}><Button href={'/new'}
       color="primary" variant="contained">Create your first recipe</Button>
       </ThemeProvider>
       </div>
-      </React.Fragment>
+      
+    </React.Fragment>
   );
 }
 export default CoCookHome;
